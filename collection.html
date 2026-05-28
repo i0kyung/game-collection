@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도감 · 화학 퍼즐 아카데미</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --surface-soft: #f4f4f5;
+    --surface-dark: #18181b;
+    --surface-dark-soft: #27272a;
+    --border: #e8e8eb;
+    --border-strong: #d4d4d8;
+    --ink: #0a0a0a;
+    --ink-soft: #3f3f46;
+    --muted: #71717a;
+    --muted-dark: #a1a1aa;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.08);
+    --radius-sm: 12px;
+    --radius: 18px;
+    --radius-lg: 26px;
+
+    --el-H-bg:  linear-gradient(150deg, #f4fbff 0%, #b9e8ff 100%);
+    --el-H-fg:  #0d73bd;
+    --el-O-bg:  linear-gradient(150deg, #ff8a7f 0%, #e0231e 100%);
+    --el-O-fg:  #ffffff;
+    --el-C-bg:  linear-gradient(150deg, #5a626a 0%, #1a1d20 100%);
+    --el-C-fg:  #ffffff;
+    --el-N-bg:  linear-gradient(150deg, #c7adff 0%, #6a3fd0 100%);
+    --el-N-fg:  #ffffff;
+    --el-Na-bg: linear-gradient(150deg, #b285f6 0%, #7445cf 100%);
+    --el-Na-fg: #ffffff;
+    --el-Cl-bg: linear-gradient(150deg, #b1f254 0%, #54a818 100%);
+    --el-Cl-fg: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    color: var(--ink);
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                 "Pretendard", "Malgun Gothic", system-ui, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button { font: inherit; cursor: pointer; border: 0; color: inherit; }
+
+  /* ──────────────  Top nav  ────────────── */
+  .nav {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px clamp(20px, 4vw, 40px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--surface-dark);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+  }
+  .brand small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .nav-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .nav-btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border-strong);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover {
+    background: #fff;
+    border-color: var(--ink-soft);
+  }
+  .nav-btn-dark {
+    background: var(--surface-dark);
+    color: #fff;
+    border-color: var(--surface-dark);
+  }
+  .nav-btn-dark:hover {
+    background: #000;
+    border-color: #000;
+  }
+
+  /* ──────────────  Page header  ────────────── */
+  .page-head {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(24px, 5vw, 56px) clamp(20px, 4vw, 40px) clamp(20px, 3vw, 32px);
+    text-align: center;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .page-head h1 {
+    margin: 0 auto 14px;
+    font-size: clamp(34px, 5.5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    max-width: 800px;
+  }
+  .page-head h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .page-head p {
+    margin: 0 auto;
+    max-width: 540px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* progress strip */
+  .progress-strip {
+    max-width: 720px;
+    margin: 28px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 20px;
+    align-items: center;
+    text-align: left;
+    box-shadow: var(--shadow-sm);
+  }
+  .progress-item strong {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .progress-item span {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .progress-item span small {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+    margin-left: 4px;
+  }
+  .reset-btn {
+    padding: 8px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface-soft);
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .reset-btn:hover {
+    background: var(--surface-dark);
+    color: #fff;
+    border-color: var(--surface-dark);
+  }
+
+  /* ──────────────  Sections  ────────────── */
+  .section {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(28px, 5vw, 56px) clamp(20px, 4vw, 40px);
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .section-head h2 small {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.6em;
+    margin-left: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .section-head .section-count {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .section-head .section-count em {
+    font-style: normal;
+    color: var(--ink);
+    font-weight: 800;
+  }
+
+  /* element grid */
+  .element-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .element-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+  }
+  .element-card.unlocked:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+  }
+  .element-card.locked {
+    background: var(--surface-soft);
+    border-style: dashed;
+  }
+  .element-card.locked .character,
+  .element-card.locked .element-name,
+  .element-card.locked .element-state {
+    filter: grayscale(1) opacity(0.35);
+  }
+  .element-card.locked::before {
+    content: "🔒";
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 26px;
+    height: 26px;
+    border-radius: 99px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+  }
+  .element-card.unlocked::before {
+    content: "✓";
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 26px;
+    height: 26px;
+    border-radius: 99px;
+    background: var(--surface-dark);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* element character */
+  .character {
+    position: relative;
+    width: 84px;
+    aspect-ratio: 1 / 1;
+    border-radius: 26px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    box-shadow:
+      inset 0 10px 16px rgba(255, 255, 255, 0.32),
+      inset 0 -10px 16px rgba(0, 0, 0, 0.16),
+      0 8px 20px rgba(0, 0, 0, 0.12);
+    user-select: none;
+  }
+  .character::before, .character::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 7px;
+    border-radius: 50%;
+    background: #0a0a0a;
+    top: 32%;
+  }
+  .character::before { left: 28%; }
+  .character::after  { right: 28%; }
+  .character-H  { background: var(--el-H-bg);  color: var(--el-H-fg); }
+  .character-O  { background: var(--el-O-bg);  color: var(--el-O-fg); }
+  .character-C  { background: var(--el-C-bg);  color: var(--el-C-fg); }
+  .character-N  { background: var(--el-N-bg);  color: var(--el-N-fg); }
+  .character-Na { background: var(--el-Na-bg); color: var(--el-Na-fg); border-radius: 18px; }
+  .character-Cl { background: var(--el-Cl-bg); color: var(--el-Cl-fg); }
+
+  .element-name {
+    text-align: center;
+  }
+  .element-name strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .element-state {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .element-desc {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    padding: 0 4px;
+  }
+  .element-card.locked .element-desc {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* compound grid */
+  .compound-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .compound-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 280px;
+  }
+  .compound-card.unlocked:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+  }
+  .compound-card.locked {
+    background: var(--surface-soft);
+    border-style: dashed;
+  }
+  .compound-art {
+    height: 130px;
+    border-radius: var(--radius-sm);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    text-align: center;
+    box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .compound-art strong {
+    display: block;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+    line-height: 1;
+  }
+  .compound-art span {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 8px;
+    opacity: 0.95;
+  }
+  .compound-card.locked .compound-art {
+    background: var(--surface-soft) !important;
+    color: var(--muted);
+    box-shadow: none;
+    border: 1px dashed var(--border-strong);
+  }
+  .compound-card.locked .compound-art strong {
+    color: var(--muted);
+    text-shadow: none;
+  }
+  .compound-meta strong {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .compound-equation {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 600;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.005em;
+  }
+  .compound-desc {
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .compound-card.locked .compound-desc {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .compound-card.locked::before {
+    content: "🔒";
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 99px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    z-index: 1;
+  }
+  .compound-card.unlocked::before {
+    content: "✓";
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 99px;
+    background: var(--surface-dark);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 1;
+  }
+
+  /* footer cta */
+  .foot-cta {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(36px, 6vw, 64px) clamp(20px, 4vw, 40px) clamp(48px, 8vw, 80px);
+    text-align: center;
+  }
+  .foot-cta-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn {
+    min-height: 50px;
+    padding: 0 24px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: -0.005em;
+  }
+  .btn-primary {
+    background: var(--surface-dark);
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    background: #000;
+    box-shadow: var(--shadow-lg);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    background: #fff;
+    border-color: var(--ink-soft);
+  }
+  .btn-arrow {
+    width: 22px;
+    height: 22px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.16);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+  }
+  .btn-secondary .btn-arrow {
+    background: var(--surface-soft);
+  }
+
+  /* reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: reveal 0.7s ease forwards;
+  }
+  @keyframes reveal {
+    to { opacity: 1; transform: none; }
+  }
+  .reveal-1 { animation-delay: 0.05s; }
+  .reveal-2 { animation-delay: 0.18s; }
+  .reveal-3 { animation-delay: 0.30s; }
+  .reveal-4 { animation-delay: 0.42s; }
+
+  @media (max-width: 620px) {
+    .progress-strip {
+      grid-template-columns: 1fr 1fr;
+    }
+    .reset-btn { grid-column: 1 / -1; justify-self: end; }
+    .foot-cta-actions { flex-direction: column; width: 100%; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav reveal reveal-1">
+    <div class="brand">
+      <div class="brand-mark">⚗</div>
+      <div>
+        화학 퍼즐 아카데미
+        <small>Chemistry Puzzle Academy</small>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="goLoading()">처음으로</button>
+      <button class="nav-btn nav-btn-dark" onclick="goMain()">메인으로</button>
+    </div>
+  </header>
+
+  <section class="page-head">
+    <div class="eyebrow reveal reveal-1">발견 기록 · Discovery</div>
+    <h1 class="reveal reveal-2">
+      도감<br>
+      <em>발견한 원소와 화합물</em>
+    </h1>
+    <p class="reveal reveal-2">
+      게임에서 직접 만든 조합이 이곳에 차곡차곡 쌓여요.
+      잠긴 카드는 보드에서 직접 조합해 잠금을 풀어보세요.
+    </p>
+
+    <div class="progress-strip reveal reveal-3">
+      <div class="progress-item">
+        <strong>발견한 원소</strong>
+        <span id="elementProgress">0<small>/ 6</small></span>
+      </div>
+      <div class="progress-item">
+        <strong>발견한 화합물</strong>
+        <span id="compoundProgress">0<small>/ 4</small></span>
+      </div>
+      <button class="reset-btn" id="resetButton">기록 초기화</button>
+    </div>
+  </section>
+
+  <section class="section reveal reveal-3">
+    <div class="section-head">
+      <h2>원소 도감 <small>Elements</small></h2>
+      <div class="section-count">발견 <em><span id="elementCount">0</span></em> / 6</div>
+    </div>
+    <div class="element-grid" id="elementGrid"></div>
+  </section>
+
+  <section class="section reveal reveal-4">
+    <div class="section-head">
+      <h2>화합물 도감 <small>Compounds</small></h2>
+      <div class="section-count">발견 <em><span id="compoundCount">0</span></em> / 4</div>
+    </div>
+    <div class="compound-grid" id="compoundGrid"></div>
+  </section>
+
+  <section class="foot-cta">
+    <div class="foot-cta-actions">
+      <button class="btn btn-primary" onclick="goMain()">
+        조합하러 가기
+        <span class="btn-arrow">→</span>
+      </button>
+      <button class="btn btn-secondary" onclick="goLoading()">
+        처음으로
+        <span class="btn-arrow">↗</span>
+      </button>
+    </div>
+  </section>
+
+<script>
+"use strict";
+
+/* ─────────  Data (same source as main.html)  ───────── */
+const ELEMENTS = {
+  H:  { symbol: "H",  name: "수소",   state: "기체", className: "H",
+        desc: "가장 가볍고 작은 원자예요. 산소와 만나면 물을 만들어요." },
+  O:  { symbol: "O",  name: "산소",   state: "기체", className: "O",
+        desc: "공기 중에서 우리가 숨 쉴 때 쓰는 원자예요." },
+  C:  { symbol: "C",  name: "탄소",   state: "고체", className: "C",
+        desc: "연필심·다이아몬드의 재료. 모든 생명체의 기본이에요." },
+  N:  { symbol: "N",  name: "질소",   state: "기체", className: "N",
+        desc: "공기 중에 가장 많은 원자예요. 수소와 만나 암모니아를 만들어요." },
+  Na: { symbol: "Na", name: "나트륨", state: "고체", className: "Na",
+        desc: "은빛 금속 원자예요. 염소와 만나면 우리가 아는 소금이 돼요." },
+  Cl: { symbol: "Cl", name: "염소",   state: "기체", className: "Cl",
+        desc: "노란빛 기체예요. 나트륨과 만나면 단단한 결정이 돼요." }
+};
+
+const REACTIONS = [
+  {
+    id: "water",
+    reactants: ["H", "H", "O"],
+    formula: "H₂O",
+    name: "물",
+    equation: "H + H + O → H₂O",
+    description: "수소 둘과 산소 하나가 만나서 물이 만들어져요.",
+    reactionType: "기체가 합쳐져 액체가 되는 조합",
+    color: "linear-gradient(150deg, #69d3ff, #1687d9)"
+  },
+  {
+    id: "carbon_dioxide",
+    reactants: ["C", "O", "O"],
+    formula: "CO₂",
+    name: "이산화탄소",
+    equation: "C + O + O → CO₂",
+    description: "탄소 하나와 산소 둘이 만나서 이산화탄소가 만들어져요.",
+    reactionType: "타오를 때 나오는 기체 조합",
+    color: "linear-gradient(150deg, #777d82, #2c2f33)"
+  },
+  {
+    id: "ammonia",
+    reactants: ["N", "H", "H", "H"],
+    formula: "NH₃",
+    name: "암모니아",
+    equation: "N + H + H + H → NH₃",
+    description: "질소 하나와 수소 셋이 만나서 암모니아가 만들어져요.",
+    reactionType: "공기 중으로 퍼지는 기체 조합",
+    color: "linear-gradient(150deg, #c8b5ff, #734bd8)"
+  },
+  {
+    id: "salt",
+    reactants: ["Na", "Cl"],
+    formula: "NaCl",
+    name: "염화나트륨",
+    equation: "Na + Cl → NaCl",
+    description: "나트륨과 염소가 만나서 우리가 아는 소금이 만들어져요.",
+    reactionType: "고체로 결정이 되는 조합",
+    color: "linear-gradient(90deg, #8b50db 0 50%, #78c61d 50% 100%)"
+  }
+];
+
+const STORAGE_KEYS = {
+  compounds: "chem_discovered_compounds",
+  elements:  "chem_discovered_elements"
+};
+
+/* ─────────  Storage  ───────── */
+function loadStorage() {
+  try {
+    const c = JSON.parse(localStorage.getItem(STORAGE_KEYS.compounds) || "[]");
+    const e = JSON.parse(localStorage.getItem(STORAGE_KEYS.elements)  || "[]");
+    return { compounds: new Set(c), elements: new Set(e) };
+  } catch {
+    return { compounds: new Set(), elements: new Set() };
+  }
+}
+function resetStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.compounds);
+    localStorage.removeItem(STORAGE_KEYS.elements);
+  } catch {/* ignore */}
+}
+
+/* ─────────  Rendering  ───────── */
+function renderElements(discoveredElements) {
+  const grid = document.getElementById("elementGrid");
+  grid.innerHTML = "";
+  let count = 0;
+
+  Object.values(ELEMENTS).forEach((el) => {
+    const unlocked = discoveredElements.has(el.symbol);
+    if (unlocked) count += 1;
+
+    const card = document.createElement("div");
+    card.className = `element-card ${unlocked ? "unlocked" : "locked"}`;
+    card.innerHTML = `
+      <div class="character character-${el.symbol}">${unlocked ? el.symbol : "?"}</div>
+      <div class="element-name">
+        <strong>${unlocked ? el.name : "잠긴 원소"}</strong>
+        <span class="element-state">${unlocked ? el.state : "????"}</span>
+      </div>
+      <p class="element-desc">${unlocked ? el.desc : "조합해서 발견해 보세요."}</p>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById("elementCount").textContent = count;
+  document.getElementById("elementProgress").innerHTML = `${count}<small>/ 6</small>`;
+}
+
+function renderCompounds(discoveredCompounds) {
+  const grid = document.getElementById("compoundGrid");
+  grid.innerHTML = "";
+  let count = 0;
+
+  REACTIONS.forEach((r) => {
+    const unlocked = discoveredCompounds.has(r.id);
+    if (unlocked) count += 1;
+
+    const card = document.createElement("div");
+    card.className = `compound-card ${unlocked ? "unlocked" : "locked"}`;
+    card.innerHTML = `
+      <div class="compound-art" style="${unlocked ? `background:${r.color}` : ""}">
+        <div>
+          <strong>${unlocked ? r.formula : "?"}</strong>
+          <span>${unlocked ? r.name : "잠긴 화합물"}</span>
+        </div>
+      </div>
+      <div class="compound-meta">
+        <strong>조합 카드</strong>
+        <div class="compound-equation">${unlocked ? r.equation : "? → ?"}</div>
+      </div>
+      <p class="compound-desc">${unlocked ? r.description : "보드에서 직접 조합해 잠금을 풀어보세요."}</p>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.getElementById("compoundCount").textContent = count;
+  document.getElementById("compoundProgress").innerHTML = `${count}<small>/ 4</small>`;
+}
+
+function renderAll() {
+  const { compounds, elements } = loadStorage();
+  renderElements(elements);
+  renderCompounds(compounds);
+}
+
+/* ─────────  Navigation  ───────── */
+function goLoading() { window.location.href = "loading.html"; }
+function goMain()    { window.location.href = "main.html"; }
+
+/* ─────────  Init  ───────── */
+function init() {
+  renderAll();
+  document.getElementById("resetButton").addEventListener("click", () => {
+    const ok = window.confirm("발견 기록을 모두 초기화할까요?\n잠긴 상태로 되돌아갑니다.");
+    if (!ok) return;
+    resetStorage();
+    renderAll();
+  });
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>

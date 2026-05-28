@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>플레이 · 화학 퍼즐 아카데미</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --surface-soft: #f4f4f5;
+    --surface-dark: #18181b;
+    --surface-dark-soft: #27272a;
+    --border: #e8e8eb;
+    --border-strong: #d4d4d8;
+    --ink: #0a0a0a;
+    --ink-soft: #3f3f46;
+    --muted: #71717a;
+    --muted-dark: #a1a1aa;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.08);
+    --radius-sm: 12px;
+    --radius: 18px;
+    --radius-lg: 26px;
+
+    --el-H-bg:  linear-gradient(150deg, #f4fbff 0%, #b9e8ff 100%);
+    --el-H-fg:  #0d73bd;
+    --el-O-bg:  linear-gradient(150deg, #ff8a7f 0%, #e0231e 100%);
+    --el-O-fg:  #ffffff;
+    --el-C-bg:  linear-gradient(150deg, #5a626a 0%, #1a1d20 100%);
+    --el-C-fg:  #ffffff;
+    --el-N-bg:  linear-gradient(150deg, #c7adff 0%, #6a3fd0 100%);
+    --el-N-fg:  #ffffff;
+    --el-Na-bg: linear-gradient(150deg, #b285f6 0%, #7445cf 100%);
+    --el-Na-fg: #ffffff;
+    --el-Cl-bg: linear-gradient(150deg, #b1f254 0%, #54a818 100%);
+    --el-Cl-fg: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    color: var(--ink);
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                 "Pretendard", "Malgun Gothic", system-ui, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button { font: inherit; cursor: pointer; border: 0; color: inherit; }
+
+  button:focus-visible,
+  .tile:focus-visible {
+    outline: 3px solid rgba(24, 24, 27, 0.32);
+    outline-offset: 3px;
+  }
+
+  /* ──────────────  Top nav  ────────────── */
+  .nav {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px clamp(16px, 3vw, 32px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--surface-dark);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+  }
+  .brand small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .nav-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .nav-btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border-strong);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-btn:hover {
+    background: #fff;
+    border-color: var(--ink-soft);
+  }
+  .nav-btn-dark {
+    background: var(--surface-dark);
+    color: #fff;
+    border-color: var(--surface-dark);
+  }
+  .nav-btn-dark:hover {
+    background: #000;
+    border-color: #000;
+  }
+
+  /* ──────────────  Mode bar  ────────────── */
+  .mode-bar {
+    max-width: 1280px;
+    margin: 0 auto 16px;
+    padding: 0 clamp(16px, 3vw, 32px);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .mode-pills {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 4px;
+  }
+  .mode-pill {
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .mode-pill.active {
+    background: var(--surface-dark);
+    color: #fff;
+  }
+  .mode-pill:hover:not(.active) {
+    color: var(--ink);
+  }
+  .mode-meta {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .mode-meta strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ──────────────  Game shell  ────────────── */
+  .shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 3vw, 32px) clamp(40px, 6vw, 64px);
+  }
+
+  /* status bar */
+  .status-bar {
+    background: var(--surface-dark);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .mission {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #fff;
+    min-width: 0;
+  }
+  .mission small {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-dark);
+    margin-bottom: 4px;
+  }
+  .status-chip {
+    padding: 8px 14px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.10);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .status-chip-dot {
+    width: 6px; height: 6px; border-radius: 99px;
+    background: #fff;
+  }
+  .status-chip-wrong .status-chip-dot { background: #f87171; }
+
+  /* time track */
+  .time-track {
+    grid-column: 1 / -1;
+    height: 6px;
+    border-radius: 99px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.14);
+    margin-top: 2px;
+    display: none;
+  }
+  .time-track.visible { display: block; }
+  .time-track.danger { animation: shake 0.18s infinite alternate; }
+  @keyframes shake {
+    from { transform: translateX(-1px); }
+    to   { transform: translateX(1px); }
+  }
+  .time-fill {
+    height: 100%;
+    width: 100%;
+    background: #fff;
+    transition: width 0.2s linear, background 0.2s ease;
+  }
+
+  /* layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr) 300px;
+    gap: 14px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+  }
+
+  /* lesson (left) */
+  .message {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    font-size: 14px;
+    white-space: pre-line;
+    min-height: 110px;
+  }
+  .message.success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #14532d;
+  }
+  .message.error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #7f1d1d;
+  }
+  .reaction-info {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--surface-soft);
+    border-radius: var(--radius-sm);
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-line;
+  }
+  .reaction-info strong {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  /* board (center) */
+  .board-panel {
+    padding: clamp(14px, 2vw, 22px);
+    position: relative;
+    overflow: hidden;
+    min-height: 460px;
+    display: flex;
+    flex-direction: column;
+  }
+  .board-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .board-legend {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    flex: 1;
+    align-content: center;
+  }
+
+  /* tile */
+  .tile {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    border-radius: 22px;
+    border: 2px solid transparent;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    user-select: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border 0.16s ease, opacity 0.16s ease;
+    box-shadow:
+      inset 0 8px 14px rgba(255, 255, 255, 0.32),
+      inset 0 -10px 16px rgba(0, 0, 0, 0.16),
+      0 6px 18px rgba(0, 0, 0, 0.10);
+  }
+  .tile::before, .tile::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 7px;
+    border-radius: 50%;
+    background: #0a0a0a;
+    top: 30%;
+  }
+  .tile::before { left: 30%; }
+  .tile::after  { right: 30%; }
+  .tile .symbol {
+    font-weight: 900;
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-top: 14px;
+  }
+  .tile .name {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+  }
+  .tile:hover { transform: translateY(-2px); }
+  .tile.selected {
+    border-color: var(--surface-dark);
+    box-shadow:
+      0 0 0 3px rgba(24, 24, 27, 0.10),
+      inset 0 8px 14px rgba(255, 255, 255, 0.32),
+      inset 0 -10px 16px rgba(0, 0, 0, 0.16),
+      0 10px 22px rgba(0, 0, 0, 0.16);
+  }
+  .tile.consumed {
+    opacity: 0.28;
+    pointer-events: none;
+    filter: grayscale(0.5);
+  }
+
+  .tile.H  { background: var(--el-H-bg);  color: var(--el-H-fg); }
+  .tile.O  { background: var(--el-O-bg);  color: var(--el-O-fg); }
+  .tile.C  { background: var(--el-C-bg);  color: var(--el-C-fg); }
+  .tile.N  { background: var(--el-N-bg);  color: var(--el-N-fg); }
+  .tile.Na { background: var(--el-Na-bg); color: var(--el-Na-fg); border-radius: 16px; }
+  .tile.Cl { background: var(--el-Cl-bg); color: var(--el-Cl-fg); }
+
+  /* animation layer */
+  .anim-layer {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .floating-compound {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    min-width: 180px;
+    padding: 18px 22px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius-lg);
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+    animation-duration: 1.5s;
+    animation-fill-mode: forwards;
+  }
+  .floating-compound strong {
+    display: block;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .floating-compound span {
+    display: block;
+    font-weight: 700;
+    font-size: 13px;
+    opacity: 0.95;
+  }
+  .move-down-flow    { animation-name: downFlow; }
+  .move-up           { animation-name: upRise; }
+  .move-up-spread    { animation-name: upSpread; }
+  .move-down-settle  { animation-name: downSettle; }
+  @keyframes downFlow {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, 80%) scale(0.95); }
+  }
+  @keyframes upRise {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -160%) scale(0.9); }
+  }
+  @keyframes upSpread {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-32%, -170%) scale(1.22); filter: blur(2px); }
+  }
+  @keyframes downSettle {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    78%  { opacity: 1; transform: translate(-50%, 60%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, 60%) scale(1); }
+  }
+
+  /* control (right) */
+  .selected-box {
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    min-height: 52px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+  .selected-box .placeholder { color: var(--muted); font-weight: 500; }
+  .selected-chip {
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--surface-dark);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .selected-plus {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .tool-stack {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .tool-btn {
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    background: var(--surface-soft);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .tool-btn:hover {
+    background: #fff;
+    border-color: var(--border-strong);
+  }
+  .tool-btn-primary {
+    background: var(--surface-dark);
+    color: #fff;
+    border-color: var(--surface-dark);
+  }
+  .tool-btn-primary:hover {
+    background: #000;
+    border-color: #000;
+    transform: translateY(-1px);
+  }
+
+  .log-box {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .log-box strong {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .log-empty { color: var(--muted); }
+
+  /* modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.55);
+    backdrop-filter: blur(4px);
+    display: none;
+    place-items: center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .modal-backdrop.visible { display: grid; }
+  .modal {
+    width: min(560px, 100%);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .modal-tag.success {
+    background: #f0fdf4; color: var(--success);
+  }
+  .modal-tag.fail {
+    background: #fef2f2; color: var(--danger);
+  }
+  .modal h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  .modal-reason {
+    margin: 0 0 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .result-cards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0 20px;
+  }
+  .result-card {
+    min-width: 100px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    color: #fff;
+    box-shadow: var(--shadow);
+  }
+  .result-card strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+  .result-card span {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.92;
+  }
+  .equation-list {
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 14px 0 18px;
+    font-size: 13px;
+  }
+  .equation-list strong {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .modal-actions .tool-btn {
+    flex: 1;
+    min-width: 130px;
+  }
+
+  /* responsive */
+  @media (max-width: 1080px) {
+    .layout { grid-template-columns: 1fr; }
+    .board-panel { min-height: 380px; }
+    .board { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  }
+  @media (max-width: 620px) {
+    .status-bar { grid-template-columns: 1fr; }
+    .board { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+    .tile .name { display: none; }
+    .tile::before, .tile::after { top: 32%; }
+    .tile .symbol { margin-top: 8px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="brand">
+      <div class="brand-mark">⚗</div>
+      <div>
+        화학 퍼즐 아카데미
+        <small>Chemistry Puzzle Academy</small>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="goLoading()">처음으로</button>
+      <button class="nav-btn nav-btn-dark" onclick="goCollection()">도감 보기</button>
+    </div>
+  </header>
+
+  <div class="mode-bar">
+    <div class="mode-pills" role="tablist">
+      <button class="mode-pill active" data-mode="practice">연습</button>
+      <button class="mode-pill" data-mode="normal">일반</button>
+      <button class="mode-pill" data-mode="challenge">챌린지</button>
+    </div>
+    <div class="mode-meta">
+      모드를 바꾸면 보드가 새로 만들어집니다.
+      <strong>발견한 화합물은 도감에 자동 저장돼요.</strong>
+    </div>
+  </div>
+
+  <main class="shell">
+
+    <div class="status-bar" id="statusBar">
+      <div class="mission">
+        <small id="modeLabel">연습</small>
+        <span id="missionLabel">먼저 원소를 선택해보세요.</span>
+      </div>
+      <div class="status-chip">
+        <span class="status-chip-dot"></span>
+        <span id="goalLabel">조합 0 / 1</span>
+      </div>
+      <div class="status-chip status-chip-wrong">
+        <span class="status-chip-dot"></span>
+        <span id="wrongLabel">오답 0</span>
+      </div>
+      <div class="time-track" id="timeTrack">
+        <div class="time-fill" id="timeFill"></div>
+      </div>
+    </div>
+
+    <div class="layout">
+
+      <aside class="panel">
+        <h3 class="panel-title">학습 안내</h3>
+        <div class="message" id="messageBox">먼저 원소 카드를 골라보세요. H, O, C, N, Na, Cl 중에서 어떤 것이든 시작이에요.</div>
+        <div class="reaction-info" id="reactionBox">
+          <strong>조합 정보</strong>
+          화합물을 만들면 어떤 조합이었는지 이곳에 표시돼요.
+        </div>
+      </aside>
+
+      <section class="panel board-panel">
+        <div class="board-head">
+          <h3 class="panel-title" style="margin: 0;">원자 보드</h3>
+          <span class="board-legend">카드를 눌러 선택 · 다시 누르면 해제</span>
+        </div>
+        <div class="board" id="board"></div>
+        <div class="anim-layer" id="animationLayer"></div>
+      </section>
+
+      <aside class="panel">
+        <h3 class="panel-title">선택한 원자</h3>
+        <div class="selected-box" id="selectedBox">
+          <span class="placeholder">아직 없음</span>
+        </div>
+        <div class="tool-stack">
+          <button class="tool-btn tool-btn-primary" id="combineButton">조합하기</button>
+          <button class="tool-btn" id="hintButton">힌트 보기</button>
+          <button class="tool-btn" id="clearButton">선택 초기화</button>
+        </div>
+        <div class="log-box" id="logBox">
+          <strong>만든 조합</strong>
+          <span class="log-empty">아직 없음</span>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Result modal -->
+  <div class="modal-backdrop" id="resultModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-tag success" id="resultTag">조합 성공</div>
+      <h2 id="resultTitle">잘했어요!</h2>
+      <p class="modal-reason" id="resultReason"></p>
+      <div class="result-cards" id="resultCards"></div>
+      <div class="equation-list" id="equationList"></div>
+      <div class="modal-actions">
+        <button class="tool-btn tool-btn-primary" id="replayButton">다시하기</button>
+        <button class="tool-btn" id="modalCollectionButton">도감 보기</button>
+        <button class="tool-btn" id="modalHomeButton">처음으로</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+"use strict";
+
+/* ─────────  Data  ───────── */
+const ELEMENTS = {
+  H:  { symbol: "H",  name: "수소",   className: "H" },
+  O:  { symbol: "O",  name: "산소",   className: "O" },
+  C:  { symbol: "C",  name: "탄소",   className: "C" },
+  N:  { symbol: "N",  name: "질소",   className: "N" },
+  Na: { symbol: "Na", name: "나트륨", className: "Na" },
+  Cl: { symbol: "Cl", name: "염소",   className: "Cl" }
+};
+
+const REACTIONS = [
+  {
+    id: "water",
+    reactants: ["H", "H", "O"],
+    formula: "H₂O",
+    name: "물",
+    equation: "H + H + O → H₂O",
+    description: "수소 둘과 산소 하나가 만나서 물이 되었어요.",
+    hint: "물은 H 두 개와 O 한 개가 필요해요.",
+    movement: "down-flow",
+    reactionType: "기체가 합쳐져 액체가 되는 조합",
+    color: "linear-gradient(150deg, #69d3ff, #1687d9)"
+  },
+  {
+    id: "carbon_dioxide",
+    reactants: ["C", "O", "O"],
+    formula: "CO₂",
+    name: "이산화탄소",
+    equation: "C + O + O → CO₂",
+    description: "탄소 하나와 산소 둘이 만나서 이산화탄소가 되었어요.",
+    hint: "이산화탄소는 C 한 개와 O 두 개가 필요해요.",
+    movement: "up",
+    reactionType: "타오를 때 나오는 기체 조합",
+    color: "linear-gradient(150deg, #777d82, #2c2f33)"
+  },
+  {
+    id: "ammonia",
+    reactants: ["N", "H", "H", "H"],
+    formula: "NH₃",
+    name: "암모니아",
+    equation: "N + H + H + H → NH₃",
+    description: "질소 하나와 수소 셋이 만나서 암모니아가 되었어요.",
+    hint: "암모니아는 N 한 개와 H 세 개가 필요해요.",
+    movement: "up-spread",
+    reactionType: "공기 중으로 퍼지는 기체 조합",
+    color: "linear-gradient(150deg, #c8b5ff, #734bd8)"
+  },
+  {
+    id: "salt",
+    reactants: ["Na", "Cl"],
+    formula: "NaCl",
+    name: "염화나트륨",
+    equation: "Na + Cl → NaCl",
+    description: "나트륨과 염소가 만나서 우리가 아는 소금이 되었어요.",
+    hint: "염화나트륨은 Na 한 개와 Cl 한 개가 필요해요.",
+    movement: "down-settle",
+    reactionType: "고체로 결정이 되는 조합",
+    color: "linear-gradient(90deg, #8b50db 0 50%, #78c61d 50% 100%)"
+  }
+];
+
+const MODES = {
+  practice: {
+    label: "연습",
+    mission: "원소를 골라 H + H + O 로 H₂O를 만들어 보세요.",
+    goal: 1,
+    maxWrong: Infinity,
+    timeLimit: 0,
+    targetIds: ["water"]
+  },
+  normal: {
+    label: "일반",
+    mission: "H₂O · CO₂ · NH₃ · NaCl 중 두 개 이상을 만들어 보세요.",
+    goal: 2,
+    maxWrong: 5,
+    timeLimit: 0,
+    targetIds: ["water", "carbon_dioxide", "ammonia", "salt"]
+  },
+  challenge: {
+    label: "챌린지",
+    mission: "제한 시간 안에 화합물 세 개를 완성해 보세요.",
+    goal: 3,
+    maxWrong: 5,
+    timeLimit: 70,
+    targetIds: ["water", "carbon_dioxide", "ammonia", "salt"],
+    penalty: 8,
+    bonus: 5
+  }
+};
+
+const STORAGE_KEYS = {
+  compounds: "chem_discovered_compounds",
+  elements:  "chem_discovered_elements"
+};
+
+const state = {
+  selectedMode: "practice",
+  currentMode: "practice",
+  board: [],
+  selectedTileIds: [],
+  compoundsMade: [],
+  equationsLearned: [],
+  discoveredThisRun: new Set(),
+  wrongCount: 0,
+  streak: 0,
+  gameActive: false,
+  remainingTime: 0,
+  timerId: null,
+  tutorialTouched: false
+};
+
+const $ = (s) => document.querySelector(s);
+
+const els = {
+  modePills: Array.from(document.querySelectorAll(".mode-pill")),
+  board: $("#board"),
+  modeLabel: $("#modeLabel"),
+  missionLabel: $("#missionLabel"),
+  goalLabel: $("#goalLabel"),
+  wrongLabel: $("#wrongLabel"),
+  messageBox: $("#messageBox"),
+  reactionBox: $("#reactionBox"),
+  selectedBox: $("#selectedBox"),
+  logBox: $("#logBox"),
+  combineButton: $("#combineButton"),
+  hintButton: $("#hintButton"),
+  clearButton: $("#clearButton"),
+  animationLayer: $("#animationLayer"),
+  timeTrack: $("#timeTrack"),
+  timeFill: $("#timeFill"),
+  resultModal: $("#resultModal"),
+  resultTag: $("#resultTag"),
+  resultTitle: $("#resultTitle"),
+  resultReason: $("#resultReason"),
+  resultCards: $("#resultCards"),
+  equationList: $("#equationList"),
+  replayButton: $("#replayButton"),
+  modalCollectionButton: $("#modalCollectionButton"),
+  modalHomeButton: $("#modalHomeButton")
+};
+
+/* ─────────  Storage  ───────── */
+function loadStorage() {
+  try {
+    const c = JSON.parse(localStorage.getItem(STORAGE_KEYS.compounds) || "[]");
+    const e = JSON.parse(localStorage.getItem(STORAGE_KEYS.elements)  || "[]");
+    return { compounds: new Set(c), elements: new Set(e) };
+  } catch {
+    return { compounds: new Set(), elements: new Set() };
+  }
+}
+function saveStorage(compoundSet, elementSet) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.compounds, JSON.stringify([...compoundSet]));
+    localStorage.setItem(STORAGE_KEYS.elements,  JSON.stringify([...elementSet]));
+  } catch {/* ignore */}
+}
+function recordDiscovery(reaction) {
+  const { compounds, elements } = loadStorage();
+  compounds.add(reaction.id);
+  reaction.reactants.forEach((sym) => elements.add(sym));
+  saveStorage(compounds, elements);
+}
+
+/* ─────────  Init  ───────── */
+function init() {
+  els.modePills.forEach((btn) => {
+    btn.addEventListener("click", () => switchMode(btn.dataset.mode));
+  });
+  els.combineButton.addEventListener("click", combineSelected);
+  els.hintButton.addEventListener("click", showHint);
+  els.clearButton.addEventListener("click", () => clearSelection(true));
+  els.replayButton.addEventListener("click", () => {
+    closeResult();
+    startGame(state.currentMode);
+  });
+  els.modalCollectionButton.addEventListener("click", goCollection);
+  els.modalHomeButton.addEventListener("click", goLoading);
+
+  // Start game right away with default mode (practice)
+  startGame("practice");
+}
+
+function switchMode(mode) {
+  if (state.currentMode === mode && state.gameActive) return;
+  els.modePills.forEach((p) => p.classList.toggle("active", p.dataset.mode === mode));
+  startGame(mode);
+}
+
+/* ─────────  Game flow  ───────── */
+function startGame(mode) {
+  state.currentMode = mode;
+  state.selectedMode = mode;
+  state.board = createBoard();
+  state.selectedTileIds = [];
+  state.compoundsMade = [];
+  state.equationsLearned = [];
+  state.discoveredThisRun = new Set();
+  state.wrongCount = 0;
+  state.streak = 0;
+  state.gameActive = true;
+  state.tutorialTouched = false;
+
+  renderBoard();
+  updateHud();
+
+  const cfg = MODES[mode];
+  setMessage(
+    mode === "practice"
+      ? "먼저 원자 카드를 골라보세요.\nH = 수소, O = 산소, C = 탄소, N = 질소, Na = 나트륨, Cl = 염소"
+      : cfg.mission,
+    "neutral"
+  );
+  els.reactionBox.innerHTML = `<strong>조합 정보</strong>화합물을 만들면 어떤 조합이었는지 이곳에 표시돼요.`;
+
+  if (cfg.timeLimit > 0) {
+    startTimer(cfg.timeLimit);
+  } else {
+    stopTimer();
+    els.timeTrack.classList.remove("visible");
+  }
+}
+
+function createBoard() {
+  const symbols = [];
+  Object.keys(ELEMENTS).forEach((s) => {
+    for (let i = 0; i < 6; i += 1) symbols.push(s);
+  });
+  shuffle(symbols);
+  return symbols.map((symbol, id) => ({ id, symbol, consumed: false }));
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderBoard() {
+  els.board.innerHTML = "";
+  state.board.forEach((tile) => {
+    const el = ELEMENTS[tile.symbol];
+    const btn = document.createElement("button");
+    btn.className = `tile ${el.className}`;
+    btn.type = "button";
+    btn.dataset.id = String(tile.id);
+    btn.setAttribute("aria-label", `${el.symbol} ${el.name}`);
+    btn.innerHTML = `<span class="symbol">${el.symbol}</span><span class="name">${el.name}</span>`;
+    btn.addEventListener("click", () => toggleTile(tile.id));
+    els.board.appendChild(btn);
+  });
+}
+
+function toggleTile(tileId) {
+  if (!state.gameActive) return;
+  const tile = state.board.find((t) => t.id === tileId);
+  if (!tile || tile.consumed) return;
+  const idx = state.selectedTileIds.indexOf(tileId);
+  if (idx >= 0) state.selectedTileIds.splice(idx, 1);
+  else {
+    state.selectedTileIds.push(tileId);
+    if (state.currentMode === "practice" && !state.tutorialTouched) {
+      state.tutorialTouched = true;
+      setMessage("좋아요. 선택과 해제를 익혔어요.\n이제 H 두 개와 O 한 개를 골라 H₂O를 만들어보세요.", "neutral");
+    }
+  }
+  updateTileStyles();
+  updateSelectedBox();
+}
+
+function updateTileStyles() {
+  Array.from(els.board.children).forEach((node) => {
+    const id = Number(node.dataset.id);
+    const tile = state.board.find((t) => t.id === id);
+    node.classList.toggle("selected", state.selectedTileIds.includes(id));
+    node.classList.toggle("consumed", Boolean(tile && tile.consumed));
+  });
+}
+
+function combineSelected() {
+  if (!state.gameActive) return;
+  if (state.selectedTileIds.length === 0) {
+    setMessage("먼저 원자 카드를 선택해 보세요.", "neutral");
+    return;
+  }
+  const symbols = state.selectedTileIds.map((id) => state.board.find((t) => t.id === id).symbol);
+  const reaction = findReaction(symbols);
+  if (!reaction) {
+    handleWrong(explainMismatch(symbols));
+    return;
+  }
+  if (!MODES[state.currentMode].targetIds.includes(reaction.id)) {
+    handleWrong("이 조합은 지금 단계에서는 인정되지 않아요.");
+    return;
+  }
+  handleSuccess(reaction);
+}
+
+function findReaction(symbols) {
+  const key = [...symbols].sort().join(",");
+  return REACTIONS.find((r) => [...r.reactants].sort().join(",") === key) || null;
+}
+
+function explainMismatch(symbols) {
+  const inputSet = new Set(symbols);
+  const sameFamily = REACTIONS.some((r) => {
+    const t = new Set(r.reactants);
+    if (t.size !== inputSet.size) return false;
+    return [...inputSet].every((s) => t.has(s));
+  });
+  if (sameFamily) return "원자의 개수가 살짝 안 맞아요. 같은 종류로 다시 세어 봐요.";
+  return "아직 어울리는 조합이 아니에요. 다른 카드를 시도해 보세요.";
+}
+
+function handleSuccess(reaction) {
+  state.streak += 1;
+  state.compoundsMade.push(reaction);
+  state.discoveredThisRun.add(reaction.id);
+  recordDiscovery(reaction);
+
+  if (!state.equationsLearned.includes(reaction.equation)) {
+    state.equationsLearned.push(reaction.equation);
+  }
+  state.selectedTileIds.forEach((id) => {
+    const t = state.board.find((x) => x.id === id);
+    if (t) t.consumed = true;
+  });
+  state.selectedTileIds = [];
+
+  setMessage(`✓ 좋아요! ${reaction.description}`, "success");
+  els.reactionBox.innerHTML =
+    `<strong>조합 정보</strong>유형: ${reaction.reactionType}\n조합 카드: ${reaction.equation}`;
+
+  playCompoundAnimation(reaction);
+
+  if (state.currentMode === "challenge" && state.streak >= 2) {
+    state.remainingTime = Math.min(MODES.challenge.timeLimit, state.remainingTime + MODES.challenge.bonus);
+  }
+  updateTileStyles();
+  updateHud();
+
+  if (state.compoundsMade.length >= MODES[state.currentMode].goal) {
+    finishGame(true, "조합 성공! 목표를 달성했어요.");
+  }
+}
+
+function handleWrong(reason) {
+  state.streak = 0;
+  state.wrongCount += 1;
+  setMessage(`× ${reason}\n힌트 버튼을 누르면 가능한 조합을 알려줘요.`, "error");
+  clearSelection(false);
+  if (state.currentMode === "challenge") {
+    state.remainingTime = Math.max(0, state.remainingTime - MODES.challenge.penalty);
+    updateTimerBar();
+  }
+  updateHud();
+  const maxWrong = MODES[state.currentMode].maxWrong;
+  if (state.wrongCount >= maxWrong) {
+    finishGame(false, "오답이 너무 많았어요. 다시 도전해볼까요?");
+  }
+}
+
+function clearSelection(showNote) {
+  state.selectedTileIds = [];
+  updateTileStyles();
+  updateSelectedBox();
+  if (showNote) setMessage("선택을 초기화했어요. 다시 골라보세요.", "neutral");
+}
+
+function showHint() {
+  const made = new Set(state.compoundsMade.map((c) => c.id));
+  const targets = MODES[state.currentMode].targetIds;
+  const next = REACTIONS.find((r) => targets.includes(r.id) && !made.has(r.id)) || REACTIONS[0];
+  setMessage(`💡 힌트: ${next.hint}`, "neutral");
+}
+
+function updateHud() {
+  const cfg = MODES[state.currentMode];
+  els.modeLabel.textContent = `${cfg.label} 모드`;
+  els.missionLabel.textContent = cfg.mission;
+  els.goalLabel.textContent = `조합 ${state.compoundsMade.length} / ${cfg.goal}`;
+  els.wrongLabel.textContent = `오답 ${state.wrongCount}`;
+  updateSelectedBox();
+
+  if (state.compoundsMade.length === 0) {
+    els.logBox.innerHTML = `<strong>만든 조합</strong><span class="log-empty">아직 없음</span>`;
+  } else {
+    const items = state.compoundsMade.map((c) => `${c.formula} · ${c.name}`).join("<br>");
+    els.logBox.innerHTML = `<strong>만든 조합</strong>${items}`;
+  }
+}
+
+function updateSelectedBox() {
+  if (state.selectedTileIds.length === 0) {
+    els.selectedBox.innerHTML = `<span class="placeholder">아직 없음</span>`;
+    return;
+  }
+  const symbols = state.selectedTileIds.map((id) => state.board.find((t) => t.id === id).symbol);
+  const parts = [];
+  symbols.forEach((s, i) => {
+    if (i > 0) parts.push(`<span class="selected-plus">+</span>`);
+    parts.push(`<span class="selected-chip">${s}</span>`);
+  });
+  els.selectedBox.innerHTML = parts.join("");
+}
+
+function setMessage(text, tone) {
+  els.messageBox.textContent = text;
+  els.messageBox.classList.remove("success", "error");
+  if (tone === "success") els.messageBox.classList.add("success");
+  if (tone === "error")   els.messageBox.classList.add("error");
+}
+
+function playCompoundAnimation(reaction) {
+  const card = document.createElement("div");
+  card.className = `floating-compound move-${reaction.movement}`;
+  card.style.background = reaction.color;
+  card.innerHTML = `<strong>${reaction.formula}</strong><span>${reaction.name}</span><span>${reaction.reactionType}</span>`;
+  els.animationLayer.appendChild(card);
+  setTimeout(() => card.remove(), 1600);
+}
+
+/* ─────────  Timer (challenge mode)  ───────── */
+function startTimer(seconds) {
+  stopTimer();
+  state.remainingTime = seconds;
+  els.timeTrack.classList.add("visible");
+  updateTimerBar();
+  state.timerId = setInterval(() => {
+    state.remainingTime = Math.max(0, state.remainingTime - 0.1);
+    updateTimerBar();
+    if (state.remainingTime <= 0) finishGame(false, "시간이 부족했어요.");
+  }, 100);
+}
+function stopTimer() {
+  if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+  els.timeTrack.classList.remove("danger");
+}
+function updateTimerBar() {
+  const total = MODES.challenge.timeLimit || 1;
+  const ratio = Math.max(0, Math.min(1, state.remainingTime / total));
+  els.timeFill.style.width = `${ratio * 100}%`;
+  els.timeFill.style.background = ratio <= 0.15 ? "#f87171" : ratio <= 0.4 ? "#fbbf24" : "#ffffff";
+  els.timeTrack.classList.toggle("danger", ratio <= 0.15);
+}
+
+/* ─────────  Finish / modal  ───────── */
+function finishGame(success, reason) {
+  if (!state.gameActive) return;
+  state.gameActive = false;
+  stopTimer();
+  showResult(success, reason);
+}
+
+function showResult(success, reason) {
+  els.resultTag.textContent = success ? "조합 성공" : "조합 실패";
+  els.resultTag.classList.toggle("success", success);
+  els.resultTag.classList.toggle("fail", !success);
+  els.resultTitle.textContent = success ? "잘했어요!" : "아쉬워요!";
+  els.resultReason.textContent = reason;
+
+  els.resultCards.innerHTML = "";
+  if (state.compoundsMade.length === 0) {
+    els.resultCards.innerHTML = `<div class="result-card" style="background:#71717a"><strong>—</strong><span>만든 화합물 없음</span></div>`;
+  } else {
+    state.compoundsMade.forEach((c) => {
+      const card = document.createElement("div");
+      card.className = "result-card";
+      card.style.background = c.color;
+      card.innerHTML = `<strong>${c.formula}</strong><span>${c.name}</span>`;
+      els.resultCards.appendChild(card);
+    });
+  }
+  els.equationList.innerHTML = state.equationsLearned.length
+    ? `<strong>이번 판에 익힌 조합</strong>${state.equationsLearned.join("<br>")}`
+    : `<strong>이번 판에 익힌 조합</strong><span style="color:var(--muted)">아직 없음</span>`;
+  els.resultModal.classList.add("visible");
+}
+
+function closeResult() {
+  els.resultModal.classList.remove("visible");
+}
+
+/* ─────────  Navigation  ───────── */
+function goLoading() {
+  window.location.href = "loading.html";
+}
+function goCollection() {
+  window.location.href = "collection.html";
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
